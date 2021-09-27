@@ -139,4 +139,4 @@ Perform leave-one-column-out (LOCO) analysis for GAMs using snow drought conditi
 SnowDrought_BestMod_Zbins_ObsAnalysis_PredictorSensitivity_PCA.R
 Perform leave-one-column-out (LOCO) analysis for GAMs using snow drought conditions with other antecedent predictors over the domain using the 100 mm peak SWE threshold. 
 
-![image](https://user-images.githubusercontent.com/36647844/134992853-2d2274c3-fa48-4b84-b18e-8d4c2e0756b8.png)
+![image](https://user-images.githubusercontent.com/36647844/134992992-4e0af7ae-dd10-438b-936d-4b08b05520f6.png)
