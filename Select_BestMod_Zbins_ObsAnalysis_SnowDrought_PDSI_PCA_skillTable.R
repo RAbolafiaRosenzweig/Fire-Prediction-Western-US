@@ -45,8 +45,8 @@ Spring_PETminusET_Z1 = Climate_Fire_Data[1:37,16]
 Winter_ET_Z1 = Climate_Fire_Data[1:37,17] 
 Winter_PET_Z1 = Climate_Fire_Data[1:37,18] 
 Winter_PETminusET_Z1 = Climate_Fire_Data[1:37,19] 
-Winter_DroughtArea_Z1 = Climate_Fire_Data[1:37,31] 
-Spring_DroughtArea_Z1 = Climate_Fire_Data[1:37,32] 
+Spring_Drought_Area_SWEI_Z1 = Climate_Fire_Data[1:37,32] 
+Spring_Drought_Area_PDSI_Z1 = Climate_Fire_Data[1:37,34] 
 
 Z1_ID = rep(1,37)
 
@@ -86,8 +86,8 @@ Spring_PETminusET_Z2 = Climate_Fire_Data[1:37,16]
 Winter_ET_Z2 = Climate_Fire_Data[1:37,17] 
 Winter_PET_Z2 = Climate_Fire_Data[1:37,18] 
 Winter_PETminusET_Z2 = Climate_Fire_Data[1:37,19] 
-Winter_DroughtArea_Z2 = Climate_Fire_Data[1:37,31] 
-Spring_DroughtArea_Z2 = Climate_Fire_Data[1:37,32]  
+Spring_Drought_Area_SWEI_Z2 = Climate_Fire_Data[1:37,32] 
+Spring_Drought_Area_PDSI_Z2 = Climate_Fire_Data[1:37,34] 
 Z2_ID = rep(2,37)
 
 #relate MODIS and MTBS BA linearly to allow MODIS to gap fill MTBS 2020 BA:
@@ -126,8 +126,8 @@ Spring_PETminusET_Z3 = Climate_Fire_Data[1:37,16]
 Winter_ET_Z3 = Climate_Fire_Data[1:37,17] 
 Winter_PET_Z3 = Climate_Fire_Data[1:37,18] 
 Winter_PETminusET_Z3 = Climate_Fire_Data[1:37,19] 
-Winter_DroughtArea_Z3 = Climate_Fire_Data[1:37,31] 
-Spring_DroughtArea_Z3 = Climate_Fire_Data[1:37,32]  
+Spring_Drought_Area_SWEI_Z3 = Climate_Fire_Data[1:37,32] 
+Spring_Drought_Area_PDSI_Z3 = Climate_Fire_Data[1:37,34] 
 Z3_ID = rep(3,37)
 
 #relate MODIS and MTBS BA linearly to allow MODIS to gap fill MTBS 2020 BA:
@@ -161,28 +161,27 @@ Spring_PETminusET = cbind(t(Spring_PETminusET_Z1[idx]),t(Spring_PETminusET_Z2[id
 Winter_ET = cbind(t(Winter_ET_Z1[idx]),t(Winter_ET_Z2[idx]),t(Winter_ET_Z3[idx]))
 Winter_PET = cbind(t(Winter_PET_Z1[idx]),t(Winter_PET_Z2[idx]),t(Winter_PET_Z3[idx]))
 Winter_PETminusET = cbind(t(Winter_PETminusET_Z1[idx]),t(Winter_PETminusET_Z2[idx]),t(Winter_PETminusET_Z3[idx]))
-Winter_DroughtArea = cbind(t(Winter_DroughtArea_Z1[idx]),t(Winter_DroughtArea_Z2[idx]),t(Winter_DroughtArea_Z3[idx]))
-Spring_DroughtArea = cbind(t(Spring_DroughtArea_Z1[idx]),t(Spring_DroughtArea_Z2[idx]),t(Spring_DroughtArea_Z3[idx]))
+Spring_Drought_Area_SWEI = cbind(t(Spring_Drought_Area_SWEI_Z1[idx]),t(Spring_Drought_Area_SWEI_Z2[idx]),t(Spring_Drought_Area_SWEI_Z3[idx]))
+Spring_Drought_Area_PDSI = cbind(t(Spring_Drought_Area_PDSI_Z1[idx]),t(Spring_Drought_Area_PDSI_Z2[idx]),t(Spring_Drought_Area_PDSI_Z3[idx]))
 Winter_Spring_Temp = (Spring_TMP+WinTMP)/2
 Winter_Spring_Precip = (Spring_PRCP+WinPRCP)/2
 Winter_Spring_VPD = (Winter_VPD+Spring_VPD)/2
 Winter_Spring_PET = (Winter_PET+Spring_PET)/2
-Winter_Spring_ET = (Winter_ET+Spring_ET)/2
 
 Zs = cbind(t(Z1_ID[idx]),t(Z2_ID[idx]),t(Z3_ID[idx]))
 
-Climate_Fire_DF = data.frame(Spring_SWEI=t(Spring_SWEI),WinPRCP = t(WinPRCP), WinTMP = t(WinTMP),Spring_PRCP = t(Spring_PRCP),Spring_TMP=t(Spring_TMP),Spring_VPD=t(Spring_VPD),Winter_VPD=t(Winter_VPD),Spring_ET=t(Spring_ET),Spring_PET=t(Spring_PET),Winter_ET=t(Winter_ET),Winter_PET=t(Winter_PET),Spring_DroughtArea=t(Spring_DroughtArea),Winter_Spring_Temp=t(Winter_Spring_Temp),Winter_Spring_Precip=t(Winter_Spring_Precip),Winter_Spring_VPD=t(Winter_Spring_VPD),Winter_Spring_PET=t(Winter_Spring_PET),Winter_Spring_ET=t(Winter_Spring_ET))
-
+Climate_Fire_DF = data.frame(Spring_SWEI=t(Spring_SWEI),Spring_PDSI=t(Spring_PDSI),WinPRCP = t(WinPRCP), WinTMP = t(WinTMP),Spring_PRCP = t(Spring_PRCP),Spring_TMP=t(Spring_TMP),Spring_VPD=t(Spring_VPD),Winter_VPD=t(Winter_VPD),Spring_ET=t(Spring_ET),Spring_PET=t(Spring_PET),Winter_ET=t(Winter_ET),Winter_PET=t(Winter_PET),Spring_Drought_Area_SWEI=t(Spring_Drought_Area_SWEI),Winter_Spring_Temp=t(Winter_Spring_Temp),Winter_Spring_Precip=t(Winter_Spring_Precip),Winter_Spring_VPD=t(Winter_Spring_VPD),Winter_Spring_PET=t(Winter_Spring_PET),Spring_Drought_Area_PDSI=t(Spring_Drought_Area_PDSI))
 
 #loop through all combinations of covariates:
+Y = as.vector(BAs)
+nvars <- 18
 
 
 #2 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_2vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_2vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 2 variables:
-nvars<- 17
 n_predictors <- 2
 ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
 x=1:nvars
@@ -263,17 +262,17 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_2vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_2vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 
 #3 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_3vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_3vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 3 variables:
@@ -361,17 +360,17 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_3vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_3vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 
 #4 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_4vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_4vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 4 variables:
@@ -463,16 +462,16 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_4vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_4vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 #5 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_5vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_5vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 5 variables:
@@ -566,16 +565,16 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_5vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_5vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 #6 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_6vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_6vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 6 variables:
@@ -672,16 +671,16 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_6vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_6vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 #7 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_7vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_7vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 7 variables:
@@ -781,17 +780,17 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_7vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_7vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 
 #8 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_8vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_8vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 8 variables:
@@ -894,16 +893,16 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_8vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_8vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 #9 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_9vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_9vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 9 variables:
@@ -1009,17 +1008,17 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_9vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_9vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 
 #10 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_10vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_10vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 10 variables:
@@ -1128,16 +1127,16 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_10vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_10vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
 
 #11 variable model:
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_11vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEI_PDSI_mod_PCA_bestmods_11vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
 #for  combos of 11 variables:
@@ -1249,10 +1248,10 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
 output<-rbind(store_AIC,store_Taylor)
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_11vars_AICfit_Drop1Taylor.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEI_PDSI_mod_PCA_11vars_AICfit_Drop1Taylor.csv")
 write.table(output,file=outfilename,sep=",",row.names = FALSE)
