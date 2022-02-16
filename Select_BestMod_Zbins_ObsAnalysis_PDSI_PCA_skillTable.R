@@ -170,7 +170,6 @@ Winter_Spring_PET = (Winter_PET+Spring_PET)/2
 Winter_Spring_ET = (Winter_ET+Spring_ET)/2
 
 Zs = cbind(t(Z1_ID[idx]),t(Z2_ID[idx]),t(Z3_ID[idx]))
-
 Climate_Fire_DF = data.frame(Spring_PDSI=t(Spring_PDSI),WinPRCP = t(WinPRCP), WinTMP = t(WinTMP),Spring_PRCP = t(Spring_PRCP),Spring_TMP=t(Spring_TMP),Spring_VPD=t(Spring_VPD),Winter_VPD=t(Winter_VPD),Spring_ET=t(Spring_ET),Spring_PET=t(Spring_PET),Winter_ET=t(Winter_ET),Winter_PET=t(Winter_PET),Spring_DroughtArea=t(Spring_DroughtArea),Winter_Spring_Temp=t(Winter_Spring_Temp),Winter_Spring_Precip=t(Winter_Spring_Precip),Winter_Spring_VPD=t(Winter_Spring_VPD),Winter_Spring_PET=t(Winter_Spring_PET),Winter_Spring_ET=t(Winter_Spring_ET))
 
 #2 variable model:
@@ -260,7 +259,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -358,7 +357,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -460,7 +459,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -563,7 +562,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -669,7 +668,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -778,7 +777,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -891,7 +890,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -1006,7 +1005,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -1125,7 +1124,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
@@ -1246,7 +1245,7 @@ for (j in 1:nmods){
   Drop1_Ann_R <- cor(store_BA_est,store_BA_obs)
   sigma_f = sd(store_BA_est)
   sigma_r = sd(store_BA_obs)
-  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  Taylor_Score = (4*(1+Drop1_Ann_R)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 *(1+1)^4)
   store_Taylor = c(store_Taylor,Taylor_Score)
   
 }
