@@ -269,7 +269,7 @@ for (m in 1:nmods){
   predictor14 <-Climate_Fire_DF[,23]
   
   Predictors_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8,predictor9=predictor9,predictor10=predictor10,predictor11=predictor11,predictor12=predictor12,predictor13=predictor13,predictor14=predictor14)
-  #for  combos of 7 variables:
+  #for  combos of 8 variables:
   n_predictors <- 8
   nvars<- 14
   ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
@@ -310,7 +310,7 @@ for (m in 1:nmods){
   pc6 = pcs[,6]
   pc7 = pcs[,7]
   pc8 = pcs[,8]
-  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=pc8,predictor89=as.vector(Zs))
+  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=pc8,predictor9=as.vector(Zs))
   mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+s(predictor6)+s(predictor7)+s(predictor8)+predictor9,family="gaussian")
   
   #GAM drop 1 year
