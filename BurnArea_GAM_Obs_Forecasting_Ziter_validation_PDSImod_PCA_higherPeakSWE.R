@@ -37,7 +37,6 @@ Spring_SWEI_Z1 = Climate_Fire_Data[1:37,10]
 Spring_VPD_Z1 = Climate_Fire_Data[1:37,11] 
 Winter_VPD_Z1 = Climate_Fire_Data[1:37,12] 
 MODIS_BA_Z1 = Climate_Fire_Data[1:37,13] 
-MODIS_BA_Z1 = (MODIS_BA_Z1*0.000247105) /(10^6);
 Spring_ET_Z1 = Climate_Fire_Data[1:37,14] 
 Spring_PET_Z1 = Climate_Fire_Data[1:37,15] 
 Spring_PETminusET_Z1 = Climate_Fire_Data[1:37,16] 
@@ -170,16 +169,15 @@ Winter_Spring_ET = (Winter_ET+Spring_ET)/2
 
 Zs = cbind(t(Z1_ID[idx]),t(Z2_ID[idx]),t(Z3_ID[idx]))
 
-Climate_Fire_DF = data.frame(Spring_PDSI = t(Spring_PDSI), WinPRCP = t(WinPRCP), WinTMP = t(WinTMP),Spring_PRCP = t(Spring_PRCP),Spring_TMP=t(Spring_TMP),Spring_VPD=t(Spring_VPD),Winter_VPD=t(Winter_VPD),Spring_ET=t(Spring_ET),Spring_PET=t(Spring_PET),Winter_ET=t(Winter_ET),Winter_PET=t(Winter_PET),Spring_DroughtArea=t(Spring_DroughtArea),Winter_Spring_Temp=t(Winter_Spring_Temp),Winter_Spring_Precip=t(Winter_Spring_Precip),Winter_Spring_VPD=t(Winter_Spring_VPD),Winter_Spring_PET=t(Winter_Spring_PET),Winter_Spring_ET=t(Winter_Spring_ET))
+Climate_Fire_DF = data.frame(Spring_SWEI=t(Spring_SWEI),WinPRCP = t(WinPRCP), WinTMP = t(WinTMP),Spring_PRCP = t(Spring_PRCP),Spring_TMP=t(Spring_TMP),Spring_VPD=t(Spring_VPD),Winter_VPD=t(Winter_VPD),Spring_ET=t(Spring_ET),Spring_PET=t(Spring_PET),Winter_ET=t(Winter_ET),Winter_PET=t(Winter_PET),Spring_DroughtArea=t(Spring_DroughtArea),Winter_Spring_Temp=t(Winter_Spring_Temp),Winter_Spring_Precip=t(Winter_Spring_Precip),Winter_Spring_VPD=t(Winter_Spring_VPD),Winter_Spring_PET=t(Winter_Spring_PET),Winter_Spring_ET=t(Winter_Spring_ET))
 
 #best model results from Select_BestMod_*.R
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_PDSImod_PCA_bestmods_higherPeakSWE.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_higherPeakSWE.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
-#define best model:
-#for  combos of 7 variables:
+#define model combination IDs
 nvars<- 17
-n_predictors <- 10
+n_predictors <- 7
 ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
 x=1:nvars
 combo_IDs<-combn(x,n_predictors)
@@ -201,9 +199,6 @@ for (j in 1:nmods){
   col5 <- combo_IDs[5,i]
   col6 <- combo_IDs[6,i]
   col7 <- combo_IDs[7,i]
-  col8 <- combo_IDs[8,i]
-  col9 <- combo_IDs[9,i]
-  col10 <- combo_IDs[10,i]
   
   predictor1 <-Climate_Fire_DF[,col1]
   predictor2 <-Climate_Fire_DF[,col2]
@@ -212,12 +207,9 @@ for (j in 1:nmods){
   predictor5 <-Climate_Fire_DF[,col5]
   predictor6 <-Climate_Fire_DF[,col6]
   predictor7 <-Climate_Fire_DF[,col7]
-  predictor8 <-Climate_Fire_DF[,col8]
-  predictor9 <-Climate_Fire_DF[,col9]
-  predictor10 <-Climate_Fire_DF[,col10]
   
   #PCA combo model:
-  Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8,predictor9=predictor9,predictor10=predictor10)
+  Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7)
   df.pca <- prcomp(Covariates_DF, center = TRUE,scale. = TRUE)
   pcs = df.pca$x
   pc1 = pcs[,1]
@@ -227,12 +219,9 @@ for (j in 1:nmods){
   pc5 = pcs[,5]
   pc6 = pcs[,6]
   pc7 = pcs[,7]
-  pc8 = pcs[,8]
-  pc9 = pcs[,9]
-  pc10 = pcs[,10]
   
-  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=pc8,predictor9=pc9,predictor10=pc10,predictor11=as.vector(Zs))
-  mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+s(predictor6)+s(predictor7)+s(predictor8)+s(predictor9)+s(predictor10)+predictor11,family="gaussian")
+  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=as.vector(Zs))
+  mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+s(predictor6)+s(predictor7)+predictor8,family="gaussian")
   #GAM drop 1 year
   yest_gam=1
   standar_error=1
@@ -241,7 +230,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -251,12 +240,12 @@ for (j in 1:nmods){
     Y_dropped = as.vector(BAs)
     Y_dropped = Y_dropped[index1]
     
-    dropped_DF_pcs <- data.frame(Y=Y_dropped,predictor1=pc1[index1],predictor2=pc2[index1],predictor3=pc3[index1],predictor4=pc4[index1],predictor5=pc5[index1],predictor6=pc6[index1],predictor7=pc7[index1],predictor8=pc8[index1],predictor9=pc9[index1],predictor10=pc10[index1],predictor11=as.vector(Zs_dropped))
+    dropped_DF_pcs <- data.frame(Y=Y_dropped,predictor1=pc1[index1],predictor2=pc2[index1],predictor3=pc3[index1],predictor4=pc4[index1],predictor5=pc5[index1],predictor6=pc6[index1],predictor7=pc7[index1],predictor8=as.vector(Zs_dropped))
     
     #model
     fit_drop_gam = gam(mod$formula,data=dropped_DF_pcs,family="gaussian")
     #now estimate at the point that was dropped
-    newdata = data.frame(predictor1=pc1[IDX_drop],predictor2=pc2[IDX_drop],predictor3=pc3[IDX_drop],predictor4=pc4[IDX_drop],predictor5=pc5[IDX_drop],predictor6=pc6[IDX_drop],predictor7=pc7[IDX_drop],predictor8=pc8[IDX_drop],predictor9=pc9[IDX_drop],predictor10=pc10[IDX_drop],predictor11=as.vector(Zs[IDX_drop]))
+    newdata = data.frame(predictor1=pc1[IDX_drop],predictor2=pc2[IDX_drop],predictor3=pc3[IDX_drop],predictor4=pc4[IDX_drop],predictor5=pc5[IDX_drop],predictor6=pc6[IDX_drop],predictor7=pc7[IDX_drop],predictor8=as.vector(Zs[IDX_drop]))
     yest_gam[IDX_drop]=predict(fit_drop_gam,newdata=newdata)
     #get the confidence interval:
     yhat <- predict(fit_drop_gam,newdata=newdata,se.fit = TRUE)
@@ -283,18 +272,18 @@ for (j in 1:nmods){
   if (Drop1_Ann_Cor >=  sqrt(0.0)) {
     good_mod_iter = good_mod_iter+1
     BAs_output<-data.frame(BA_obs=t(BAs),BA_est_drop1=yest_gam,BA_fit=predict(mod))
-    outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_GAM_Zbins_mod%d_PDSImod_PCA_higherPeakSWE.csv",i)
+    outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_GAM_Zbins_mod%d_SWEImod_PCA_higherPeakSWE.csv",i)
     write.table(BAs_output,file=outfilename,sep=",",row.names = FALSE)
     
     #record ID of good models to export and use in matlab analysis 
     Good_mods[good_mod_iter] = i
     
     #record standard error:
-    outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_mod%d_PDSImod_PCA_higherPeakSWE.csv",i)
+    outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_mod%d_SWEImod_PCA_higherPeakSWE.csv",i)
     write.table(standar_error,file=outfilename,sep=",",row.names = FALSE)
   }
 }
-outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Good_Mods_PDSImod_PCA_higherPeakSWE.csv")
+outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Good_Mods_SWEImod_PCA_higherPeakSWE.csv")
 write.table(Good_mods,file=outfilename,sep=",",row.names = FALSE)
 
 store_R

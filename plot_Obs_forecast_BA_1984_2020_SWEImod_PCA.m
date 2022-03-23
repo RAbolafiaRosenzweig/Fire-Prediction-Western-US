@@ -19,7 +19,7 @@ WYs = repmat(1984:2020,1,nbins);
 
 %initialize annual prediction and standard error data:
 store_predictions=[];
-store_se =[]; 
+store_se =[];
 for i=1:nmods
     mod_id = Good_mods(i);
     %get current prediction
@@ -44,12 +44,13 @@ end
 Annual_BA_obs = [Annual_BA_obs];
 
 ensemble_mean = mean(store_predictions')';
+ensemble_mean_fit = ensemble_mean;
 %ensemble_mean = store_predictions;
 
 se = max(store_se')';
 %record ensemble upper and lower bounds based on se from gam predictions:
-ensemble_upr = max(store_predictions')';
-ensemble_lwr = min(store_predictions')';
+ensemble_upr = prctile(store_predictions',97.5)';
+ensemble_lwr = prctile(store_predictions',2.5)';
 
 %% plot data:
 lb=ensemble_mean-ensemble_lwr;
@@ -83,6 +84,22 @@ xtickangle(45)
 box on
 ylim([0 6])
 saveas(f,'/Users/abolafia/Drought_Fire_Snow/Plots/BA_predict_1984_2020_Obs_GAM_timeseries_SWEImod_PCA_fit.eps','epsc')
+
+%consider percent of times ensemble range captures observed BA:
+idx = find(ensemble_upr>=Annual_BA_obs & ensemble_lwr<=Annual_BA_obs);
+pct_captured = length(idx)/length(Annual_BA_obs)*100;
+sprintf('ensemble best fit range captures obs %.4g percent of the time',pct_captured)
+idx = find(ensemble_upr<Annual_BA_obs | ensemble_lwr>Annual_BA_obs);
+store_pct_miss=[];
+for i=1:length(idx)
+    IDX = idx(i);
+    if ensemble_upr(IDX)<Annual_BA_obs(IDX)
+        pct_miss = (ensemble_upr(IDX)-Annual_BA_obs(IDX))./Annual_BA_obs(IDX)*100;
+    elseif ensemble_lwr(IDX)>Annual_BA_obs(IDX)
+        pct_miss = (ensemble_lwr(IDX)-Annual_BA_obs(IDX))./Annual_BA_obs(IDX)*100;
+    end
+    store_pct_miss = [ store_pct_miss;abs(pct_miss)];
+end
 
 %scatter plot:
 f=figure;
@@ -157,11 +174,11 @@ Annual_BA_obs = [Annual_BA_obs];
 
 ensemble_mean = mean(store_predictions')';
 %ensemble_mean = store_predictions;
-
+pp
 se = max(store_se')';
 %record ensemble upper and lower bounds based on se from gam predictions:
-ensemble_upr = max(store_predictions')';
-ensemble_lwr = min(store_predictions')';
+ensemble_upr = prctile(store_predictions',97.5)';
+ensemble_lwr = prctile(store_predictions',2.5)';
 %% plot data:
 lb=ensemble_mean-ensemble_lwr;
 ub=ensemble_upr-ensemble_mean;
@@ -171,16 +188,30 @@ f=figure;
 hold on
 shadedErrorBar(years, ensemble_mean, [ub';lb'], 'k-',1);
 p1=plot(years, ensemble_mean,'-k','linewidth',3);
-%include trend line:
-p=polyfit(years,ensemble_mean,1);
+
+%compute trend line (including 2020):
+p=polyfit(years(1:end),ensemble_mean(1:end),1);
 y = @(x) p(1)*x + p(2);
-plot(years,y(years),'--k','linewidth',2)
+sprintf('drop1 prediction increasing trend (including 2020): %.2f/year',p(1)/mean(ensemble_mean(1:end))*100)
+
+%include trend line (excluding 2020):
+p=polyfit(years(1:end-1),ensemble_mean(1:end-1),1);
+y = @(x) p(1)*x + p(2);
+plot(years(1:end-1),y(years(1:end-1)),'--k','linewidth',2)
+sprintf('drop1 prediction increasing trend (excluding 2020): %.2f/year',p(1)/mean(ensemble_mean(1:end-1))*100)
 
 p2 = plot(years,Annual_BA_obs,'-r','linewidth',3);
-%include trend line:
-p=polyfit(years,Annual_BA_obs,1);
+
+%compute trend line (including 2020):
+p=polyfit(years(1:end),Annual_BA_obs(1:end),1);
 y = @(x) p(1)*x + p(2);
-plot(years,y(years),'--r','linewidth',2)
+sprintf('obs increasing trend: %.2f/year (including 2020)',p(1)/mean(Annual_BA_obs)*100)
+
+%include trend line (excluding 2020):
+p=polyfit(years(1:end-1),Annual_BA_obs(1:end-1),1);
+y = @(x) p(1)*x + p(2);
+plot(years(1:end-1),y(years(1:end-1)),'--r','linewidth',2)
+sprintf('obs increasing trend: %.2f/year (excluding 2020)',p(1)/mean(Annual_BA_obs(1:end-1))*100)
 
 legend([p1 p2],{'Predicted','Observed'},'fontsize',25,'location','northwest')
 ylabel('Burned area (millions of acres)','fontsize',25)
@@ -215,6 +246,7 @@ set(gca,'fontsize',25)
 %R and RMSE
 R = corr(Annual_BA_obs,ensemble_mean,'rows','complete')
 RMSE = sqrt( mean((Annual_BA_obs-ensemble_mean).^2) )
+PBIAS =  mean( ((ensemble_mean-Annual_BA_obs)./mean(Annual_BA_obs)) ) * 100;
 %percent of time +/- anomalies are correctly predicted:
 Annual_BA_obs_anom = Annual_BA_obs - mean(Annual_BA_obs);
 ensemble_mean_anom = ensemble_mean - mean(ensemble_mean);
@@ -236,4 +268,24 @@ Total_BA = BA_data.WesternUS_BA.total;
 
 disp('drop 1 correlation with total western us ba:')
 corr(ensemble_mean,Total_BA)
+ensemble_mean_drop1 = ensemble_mean;
+
+%consider percent of times ensemble range captures observed BA:
+%record ensemble upper and lower bounds based on se from gam predictions:
+%consider percent of times ensemble range captures observed BA:
+idx = find(ensemble_upr>=Annual_BA_obs & ensemble_lwr<=Annual_BA_obs);
+pct_captured = length(idx)/length(Annual_BA_obs)*100;
+sprintf('ensemble drop1 range captures obs %.4g percent of the time',pct_captured)
+idx = find(ensemble_upr<Annual_BA_obs | ensemble_lwr>Annual_BA_obs);
+store_pct_miss=[];
+for i=1:length(idx)
+    IDX = idx(i);
+    pct_miss_uppr = (ensemble_upr(IDX)-Annual_BA_obs(IDX))./Annual_BA_obs(IDX)*100;
+    pct_miss_lwr = (ensemble_lwr(IDX)-Annual_BA_obs(IDX))./Annual_BA_obs(IDX)*100;
+    pct_miss = min([abs(pct_miss_uppr),abs(pct_miss_lwr)]);
+    store_pct_miss = [ store_pct_miss;abs(pct_miss)];
+end
+
+%% export data for mendeley upload:
+Output_Data = [Annual_BA_obs,ensemble_mean_fit,ensemble_mean_drop1];
 

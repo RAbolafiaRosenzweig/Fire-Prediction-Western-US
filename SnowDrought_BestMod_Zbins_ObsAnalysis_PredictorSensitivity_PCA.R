@@ -38,7 +38,6 @@ Spring_SWEI_Z1 = Climate_Fire_Data[1:37,10]
 Spring_VPD_Z1 = Climate_Fire_Data[1:37,11] 
 Winter_VPD_Z1 = Climate_Fire_Data[1:37,12] 
 MODIS_BA_Z1 = Climate_Fire_Data[1:37,13] 
-MODIS_BA_Z1 = (MODIS_BA_Z1*0.000247105) /(10^6);
 Spring_ET_Z1 = Climate_Fire_Data[1:37,14] 
 Spring_PET_Z1 = Climate_Fire_Data[1:37,15] 
 Spring_PETminusET_Z1 = Climate_Fire_Data[1:37,16] 
@@ -177,7 +176,7 @@ Y = as.vector(BAs)
 nvars <- 17 
 
 
-n_predictors <- 8
+n_predictors <- 5
 ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
 x=1:nvars
 combo_IDs<-combn(x,n_predictors)
@@ -186,7 +185,7 @@ combo_IDs<-combn(x,n_predictors)
 #calculate performance removing 1 climate variable at a time:
 
 #load in the list of best models:
-best_mod_ids = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_8vars.csv",sep=",",header=TRUE)
+best_mod_ids = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_5vars.csv",sep=",",header=TRUE)
 best_mod_ids=as.numeric(best_mod_ids)
 nmods = length(best_mod_ids)
 
@@ -197,21 +196,15 @@ for (j in 1:nmods){
   col3 <- combo_IDs[3,i]
   col4 <- combo_IDs[4,i]
   col5 <- combo_IDs[5,i]
-  col6 <- combo_IDs[6,i]
-  col7 <- combo_IDs[7,i]
-  col8 <- combo_IDs[8,i]
   
   predictor1 <-Climate_Fire_DF[,col1]
   predictor2 <-Climate_Fire_DF[,col2]
   predictor3 <-Climate_Fire_DF[,col3]
   predictor4 <-Climate_Fire_DF[,col4]
   predictor5 <-Climate_Fire_DF[,col5]
-  predictor6 <-Climate_Fire_DF[,col6]
-  predictor7 <-Climate_Fire_DF[,col7]
-  predictor8 <-Climate_Fire_DF[,col8]
   
   #PCA combo model:
-  Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
+  Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5)
   df.pca <- prcomp(Covariates_DF, center = TRUE,scale. = TRUE)
   pcs = df.pca$x
   pc1 = pcs[,1]
@@ -219,12 +212,9 @@ for (j in 1:nmods){
   pc3 = pcs[,3]
   pc4 = pcs[,4]
   pc5 = pcs[,5]
-  pc6 = pcs[,6]
-  pc7 = pcs[,7]
-  pc8 = pcs[,8]
   
-  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=pc8,predictor9=as.vector(Zs))
-  mod_original <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+s(predictor6)+s(predictor7)+s(predictor8)+predictor9,family="gaussian")
+  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=as.vector(Zs))
+  mod_original <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+predictor6,family="gaussian")
   yhat=predict(mod_original)
   
   iter=0
@@ -239,54 +229,43 @@ for (j in 1:nmods){
   R_fit=cor(yhat_ann,Y_ann)
   PBias_fit = mean(yhat - Y)/mean(Y)
   RMSE_fit = sqrt( sum( (yhat - Y)^2 )  /length(Y))
-
+  sigma_f = sd(yhat)
+  sigma_r = sd(Y)
+  Taylor_Score_fit = (4*(1+R_fit)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
+  
 iter=0
 store_Stats_rm=c()
 for (p in 1:n_predictors){
   if(p==1){
     #Remove predictor 1:
-    Covariates_DF = data.frame(predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
+    Covariates_DF = data.frame(predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5)
   }
   if (p==2){
     #Remove predictor 2:
-    Covariates_DF = data.frame(predictor1=predictor1,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
+    Covariates_DF = data.frame(predictor1=predictor1,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5)
   }
   if (p==3){
     #Remove predictor 3:
-    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
+    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor4=predictor4,predictor5=predictor5)
   }
   if (p==4){
     #Remove predictor 4:
-    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
+    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor5=predictor5)
   }
   if (p==5){
     #Remove predictor 5:
-    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
+    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4)
   }
-  if (p==6){
-    #Remove predictor 6:
-    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor7=predictor7,predictor8=predictor8)
-  }
-  if (p==7){
-    #Remove predictor 7:
-    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor8=predictor8)
-  }
-  if (p==8){
-    #Remove predictor 8:
-    Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7)
-  }
+
   df.pca <- prcomp(Covariates_DF, center = TRUE,scale. = TRUE)
   pcs = df.pca$x
   pc1 = pcs[,1]
   pc2 = pcs[,2]
   pc3 = pcs[,3]
   pc4 = pcs[,4]
-  pc5 = pcs[,5]
-  pc6 = pcs[,6]
-  pc7 = pcs[,7]
   
-  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=as.vector(Zs))
-  mod_rm <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+s(predictor6)+s(predictor7)+predictor8,family="gaussian")
+  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=as.vector(Zs))
+  mod_rm <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+predictor5,family="gaussian")
   yhat=predict(mod_rm)
   
   for (year in 1984:2020){
@@ -298,8 +277,11 @@ for (p in 1:n_predictors){
   R_rm=cor(yhat_ann,Y_ann)
   PBias_rm = mean(yhat - Y)/mean(Y)
   RMSE_rm = sqrt( sum( (yhat - Y)^2 )  /length(Y))
+  sigma_f = sd(yhat)
+  sigma_r = sd(Y)
+  Taylor_Score_rm = (4*(1+R_rm)^4)/( ( (sigma_f/sigma_r)+(sigma_r/sigma_f))^2 +(1+1)^4)
   
-  store_Stats_rm=rbind(store_Stats_rm,c(R_rm,PBias_rm,RMSE_rm) )
+  store_Stats_rm=rbind(store_Stats_rm,c(R_rm,PBias_rm,RMSE_rm,Taylor_Score_rm) )
   }
   #store output: [predictor ID, R2-rm, R-fit(same for all predictors)]
   predictor_IDs=combo_IDs[,i]
@@ -307,15 +289,18 @@ for (p in 1:n_predictors){
   R_rm = store_Stats_rm[,1]
   R2_rm = R_rm^2
   R2_fit = R_fit^2
-  R2_fit = rep(R2_fit,times=8)
+  R2_fit = rep(R2_fit,times=5)
   #PBIAS:
   PBIAS_rm = store_Stats_rm[,2]
-  PBias_fit = rep(PBias_fit,times=8)
+  PBias_fit = rep(PBias_fit,times=5)
   #RMSE:
   RMSE_rm = store_Stats_rm[,3]
-  RMSE_fit = rep(RMSE_fit,times=8)
+  RMSE_fit = rep(RMSE_fit,times=5)
+  #Taylor
+  Taylor_rm = store_Stats_rm[,4]
+  Taylor_fit = rep(Taylor_Score_fit,times=5)
   
-  output = data.frame(predictor_IDs=predictor_IDs,R2_rm=R2_rm,R2_fit=R2_fit,PBIAS_rm=PBIAS_rm,PBias_fit=PBias_fit,RMSE_rm=RMSE_rm,RMSE_fit=RMSE_fit)
+  output = data.frame(predictor_IDs=predictor_IDs,R2_rm=R2_rm,R2_fit=R2_fit,PBIAS_rm=PBIAS_rm,PBias_fit=PBias_fit,RMSE_rm=RMSE_rm,RMSE_fit=RMSE_fit,Taylor_rm,Taylor_fit)
   outfilename = sprintf("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_drop_predictor_sensitivity_mod%d.csv",i)
   write.table(output,file=outfilename,sep=",",row.names = FALSE)
 }

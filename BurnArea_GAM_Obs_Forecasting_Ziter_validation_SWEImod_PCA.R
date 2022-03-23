@@ -38,7 +38,6 @@ Spring_SWEI_Z1 = Climate_Fire_Data[1:37,10]
 Spring_VPD_Z1 = Climate_Fire_Data[1:37,11] 
 Winter_VPD_Z1 = Climate_Fire_Data[1:37,12] 
 MODIS_BA_Z1 = Climate_Fire_Data[1:37,13] 
-MODIS_BA_Z1 = (MODIS_BA_Z1*0.000247105) /(10^6);
 Spring_ET_Z1 = Climate_Fire_Data[1:37,14] 
 Spring_PET_Z1 = Climate_Fire_Data[1:37,15] 
 Spring_PETminusET_Z1 = Climate_Fire_Data[1:37,16] 
@@ -177,13 +176,12 @@ Climate_Fire_DF = data.frame(Spring_SWEI = t(Spring_SWEI), WinPRCP = t(WinPRCP),
 Y = as.vector(BAs)
 
 #best model results from Select_BestMod_*.R
-best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_8vars.csv",sep=",",header=TRUE)
+best_mods_idx = read.csv("/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_5vars.csv",sep=",",header=TRUE)
 best_mods_idx=as.numeric(best_mods_idx)
 nmods = length(best_mods_idx)
-#define best model:
-#for  combos of 6 variables:
+#define model combination IDs
 nvars<- 17
-n_predictors <- 8
+n_predictors <- 5
 ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
 x=1:nvars
 combo_IDs<-combn(x,n_predictors)
@@ -203,21 +201,15 @@ for (j in 1:nmods){
   col3 <- combo_IDs[3,i]
   col4 <- combo_IDs[4,i]
   col5 <- combo_IDs[5,i]
-  col6 <- combo_IDs[6,i]
-  col7 <- combo_IDs[7,i]
-  col8 <- combo_IDs[8,i]
   
   predictor1 <-Climate_Fire_DF[,col1]
   predictor2 <-Climate_Fire_DF[,col2]
   predictor3 <-Climate_Fire_DF[,col3]
   predictor4 <-Climate_Fire_DF[,col4]
   predictor5 <-Climate_Fire_DF[,col5]
-  predictor6 <-Climate_Fire_DF[,col6]
-  predictor7 <-Climate_Fire_DF[,col7]
-  predictor8 <-Climate_Fire_DF[,col8]
   
   #PCA combo model:
-  Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
+  Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5)
   df.pca <- prcomp(Covariates_DF, center = TRUE,scale. = TRUE)
   pcs = df.pca$x
   pc1 = pcs[,1]
@@ -225,12 +217,9 @@ for (j in 1:nmods){
   pc3 = pcs[,3]
   pc4 = pcs[,4]
   pc5 = pcs[,5]
-  pc6 = pcs[,6]
-  pc7 = pcs[,7]
-  pc8 = pcs[,8]
   
-  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=pc8,predictor9=as.vector(Zs))
-  mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+s(predictor6)+s(predictor7)+s(predictor8)+predictor9,family="gaussian")
+  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=as.vector(Zs))
+  mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+predictor6,family="gaussian")
   #GAM drop 1 year
   yest_gam=1
   standar_error=1
@@ -239,7 +228,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -249,12 +238,16 @@ for (j in 1:nmods){
     Y_dropped = as.vector(BAs)
     Y_dropped = Y_dropped[index1]
     
-    dropped_DF_pcs <- data.frame(Y=Y_dropped,predictor1=pc1[index1],predictor2=pc2[index1],predictor3=pc3[index1],predictor4=pc4[index1],predictor5=pc5[index1],predictor6=pc6[index1],predictor7=pc7[index1],predictor8=pc8[index1],predictor9=as.vector(Zs_dropped))
-    
+    dropped_DF_pcs <- data.frame(Y=Y_dropped,predictor1=pc1[index1],predictor2=pc2[index1],predictor3=pc3[index1],predictor4=pc4[index1],predictor5=pc5[index1],predictor6=as.vector(Zs_dropped))
+    S=dim(dropped_DF_pcs)
+    if(S[1]!=111-3){
+      S[1]
+      stop('wrong dim')
+    }
     #model
     fit_drop_gam = gam(mod$formula,data=dropped_DF_pcs,family="gaussian")
     #now estimate at the point that was dropped
-    newdata = data.frame(predictor1=pc1[IDX_drop],predictor2=pc2[IDX_drop],predictor3=pc3[IDX_drop],predictor4=pc4[IDX_drop],predictor5=pc5[IDX_drop],predictor6=pc6[IDX_drop],predictor7=pc7[IDX_drop],predictor8=pc8[IDX_drop],predictor9=as.vector(Zs[IDX_drop]))
+    newdata = data.frame(predictor1=pc1[IDX_drop],predictor2=pc2[IDX_drop],predictor3=pc3[IDX_drop],predictor4=pc4[IDX_drop],predictor5=pc5[IDX_drop],predictor6=as.vector(Zs[IDX_drop]))
     yest_gam[IDX_drop]=predict(fit_drop_gam,newdata=newdata)
     #get the confidence interval:
     yhat <- predict(fit_drop_gam,newdata=newdata,se.fit = TRUE)

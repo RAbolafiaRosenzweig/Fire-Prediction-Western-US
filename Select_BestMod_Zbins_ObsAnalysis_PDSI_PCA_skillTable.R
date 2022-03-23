@@ -38,7 +38,6 @@ Spring_SWEI_Z1 = Climate_Fire_Data[1:37,10]
 Spring_VPD_Z1 = Climate_Fire_Data[1:37,11] 
 Winter_VPD_Z1 = Climate_Fire_Data[1:37,12] 
 MODIS_BA_Z1 = Climate_Fire_Data[1:37,13] 
-MODIS_BA_Z1 = (MODIS_BA_Z1*0.000247105) /(10^6);
 Spring_ET_Z1 = Climate_Fire_Data[1:37,14] 
 Spring_PET_Z1 = Climate_Fire_Data[1:37,15] 
 Spring_PETminusET_Z1 = Climate_Fire_Data[1:37,16] 
@@ -219,7 +218,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -230,7 +229,11 @@ for (j in 1:nmods){
     Y_dropped = Y_dropped[index1]
     
     dropped_DF_pcs <- data.frame(Y=Y_dropped,predictor1=pc1[index1],predictor2=pc2[index1],predictor3=as.vector(Zs_dropped))
-    
+    S=dim(dropped_DF_pcs)
+    if(S[1]!=111-3){
+      S[1]
+      stop('wrong dim')
+    }
     #model
     fit_drop_gam = gam(mod$formula,data=dropped_DF_pcs,family="gaussian")
     #now estimate at the point that was dropped
@@ -318,7 +321,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -419,7 +422,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -523,7 +526,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -629,7 +632,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -738,7 +741,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -851,7 +854,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -966,7 +969,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -1085,7 +1088,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:
@@ -1206,7 +1209,7 @@ for (j in 1:nmods){
     Y_iter = Y_iter+1
     #drop 1 year
     IDX_drop <-which(WYs == Y)
-    index1=index[index != IDX_drop]
+    index1=index[-IDX_drop]
     dropped_DF=Climate_Fire_DF[index1,]
     
     #PCA combo model:

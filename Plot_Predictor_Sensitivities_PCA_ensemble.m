@@ -6,7 +6,7 @@ vars={'SWEI','Winter Precip.','Winter Temp.','Spring Precip.','Spring Temp.','Sp
 
 %% load results from top models:
 %[best predictors,dropped predictor R2 fit, R2 fit]
-best_mod_ids = readtable('/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_8vars.csv');
+best_mod_ids = readtable('/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_bestmods_5vars.csv');
 best_mod_ids = table2array(best_mod_ids);
 nmods = length(best_mod_ids);
 
@@ -14,6 +14,7 @@ store_R2_bestfit=[];
 store_pbias_bestfit=[];
 store_rmse_bestfit=[];
 store_mod_data=[];
+store_taylor_bestfit=[];
 for i=1:nmods
     mod_id = best_mod_ids(i);
     infilename=sprintf('/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_Forecast_SE_Zbins_SWEImod_PCA_drop_predictor_sensitivity_mod%d.csv',mod_id);
@@ -32,14 +33,17 @@ for i=1:nmods
     %RMSE:
     dropped_rmse = mod_data(:,6);
     rmse_bestfit = mod_data(:,7);
+    %Taylor:
+    dropped_taylor = mod_data(:,8);
+    taylor_bestfit = mod_data(:,9);
     
     %store data:
     store_mod_data=[store_mod_data;mod_data];
     store_R2_bestfit = [store_R2_bestfit;R2_bestfit(1)];
     store_pbias_bestfit = [store_pbias_bestfit;pbias_bestfit(1)];
     store_rmse_bestfit = [store_rmse_bestfit;rmse_bestfit(1)];
+    store_taylor_bestfit =[store_taylor_bestfit;taylor_bestfit(1)];
 end
-
 %% record number of times each predictor appears in 20 best models:
 unique_predictors = unique(store_mod_data(:,1));
 unique_predictors = sort(unique_predictors);
@@ -71,7 +75,7 @@ ylabel({'Appearances in';'best models'},'fontsize',20)
 
 %% create a boxplot plot showing the ratio of summary stats explained after removing each predictor:
 %only consider predictors that appear in at least 10 models:
-idx_over10 = find(sorted_counts>=10);
+idx_over10 = find(sorted_counts>=0);
 predictor_IDS = sorted_predictor_ids(idx_over10);
 
 %% R2:
@@ -94,11 +98,32 @@ set(gca,'fontsize',20)
 ylabel({'r^{2} ratio'},'fontsize',20)
 xtickangle(20)
 ylim([0.6 1.1])
-xlim([0.5 17.5])
+xlim([0.5 length(idx_over10)+0.5])
 grid on
-plot(linspace(0.5,17.5,10),linspace(nanmedian(store_R2_ratios(:,1)),nanmedian(store_R2_ratios(:,1)),10),'--r')
-plot(linspace(0.5,17.5,10),linspace(prctile(store_R2_ratios(:,1),25),prctile(store_R2_ratios(:,1),25),10),'--b')
-plot(linspace(0.5,17.5,10),linspace(prctile(store_R2_ratios(:,1),75),prctile(store_R2_ratios(:,1),75),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(nanmedian(store_R2_ratios(:,3)),nanmedian(store_R2_ratios(:,3)),10),'--r')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_R2_ratios(:,3),25),prctile(store_R2_ratios(:,3),25),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_R2_ratios(:,3),75),prctile(store_R2_ratios(:,3),75),10),'--b')
+
+% % store_better=[];
+% % for i=1:16
+% %     bettermedian = 0;
+% %     better25 = 0;
+% %     better75 = 0;
+% %     if ( nanmedian(store_R2_ratios(:,i+1)) < nanmedian(store_R2_ratios(:,1)) )
+% %         bettermedian = 1;
+% %     end
+% %     if ( prctile(store_R2_ratios(:,i+1),25) < prctile(store_R2_ratios(:,1),25) )
+% %         better25 = 1;
+% %     end
+% %     if ( prctile(store_R2_ratios(:,i+1),75) < prctile(store_R2_ratios(:,1),75) )
+% %         better75 = 1;
+% %     end
+% %     
+% %     if bettermedian == 1 && better25 == 1 && better75 == 1
+% %         store_better = [store_better;i];
+% %         barplot_categories{i+1}
+% %     end
+% % end
 
 %% rmse:
 rmse_ratio = store_mod_data(:,6)./store_mod_data(:,7);
@@ -117,18 +142,44 @@ hold on
 b=boxplot(store_rmse_ratios,'Notch','off','Labels',labels,'whisker',1);
 set(b,'linew',3)
 set(gca,'fontsize',20)
-ylabel({'rmse ratio'},'fontsize',20)
+ylabel({'RMSE ratio'},'fontsize',20)
 xtickangle(20)
 ylim([0.85 1.6])
-xlim([0.5 17.5])
+xlim([0.5 length(idx_over10)+0.5])
 grid on
-plot(linspace(0.5,17.5,10),linspace(nanmedian(store_rmse_ratios(:,1)),nanmedian(store_rmse_ratios(:,1)),10),'--r')
-plot(linspace(0.5,17.5,10),linspace(prctile(store_rmse_ratios(:,1),25),prctile(store_rmse_ratios(:,1),25),10),'--b')
-plot(linspace(0.5,17.5,10),linspace(prctile(store_rmse_ratios(:,1),75),prctile(store_rmse_ratios(:,1),75),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(nanmedian(store_rmse_ratios(:,3)),nanmedian(store_rmse_ratios(:,3)),10),'--r')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_rmse_ratios(:,3),25),prctile(store_rmse_ratios(:,3),25),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_rmse_ratios(:,3),75),prctile(store_rmse_ratios(:,3),75),10),'--b')
 
 f.Position=[-1919        -144        1868         949];
 saveas(f,'/Users/abolafia/Drought_Fire_Snow/Plots/BA_predict_1984_2020_Obs_SWEImod_PCA_predictor_sensitivity_ensemble.eps','epsc')
 
+pp
+%% report importance in terms of Taylor skill scores:
+figure
+taylor_ratio = store_mod_data(:,8)./store_mod_data(:,9);
+
+store_taylor_ratios = nan(100,length(idx_over10));
+
+for i = 1:length(idx_over10)
+    IDX = find(store_mod_data(:,1) == predictor_IDS(i));
+    current_taylor_ratio = taylor_ratio(IDX);
+    store_taylor_ratios(1:length(current_taylor_ratio),i) = current_taylor_ratio;
+end
+
+labels=barplot_categories(idx_over10);
+hold on
+b=boxplot(store_taylor_ratios,'Notch','off','Labels',labels,'whisker',1);
+set(b,'linew',3)
+set(gca,'fontsize',20)
+ylabel({'Taylor ratio'},'fontsize',20)
+xtickangle(20)
+ylim([0.6 1.1])
+xlim([0.5 length(idx_over10)+0.5])
+grid on
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(nanmedian(store_taylor_ratios(:,1)),nanmedian(store_taylor_ratios(:,1)),10),'--r')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_taylor_ratios(:,1),25),prctile(store_taylor_ratios(:,1),25),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_taylor_ratios(:,1),75),prctile(store_taylor_ratios(:,1),75),10),'--b')
 
 %% report relative importance of SWEI:
 %% r:

@@ -71,7 +71,7 @@ ylabel({'Appearances in';'best models'},'fontsize',20)
 
 %% create a boxplot plot showing the ratio of summary stats explained after removing each predictor:
 %only consider predictors that appear in at least 10 models:
-idx_over10 = find(sorted_counts>=10);
+idx_over10 = find(sorted_counts>=0);
 predictor_IDS = sorted_predictor_ids(idx_over10);
 
 %% R2:
@@ -94,11 +94,11 @@ set(gca,'fontsize',20)
 ylabel({'r^{2} ratio'},'fontsize',20)
 xtickangle(20)
 ylim([0.6 1.1])
-xlim([0.5 16.5])
+xlim([0.5 length(idx_over10)+0.5])
 grid on
-plot(linspace(0.5,16.5,10),linspace(nanmedian(store_R2_ratios(:,1)),nanmedian(store_R2_ratios(:,1)),10),'--r')
-plot(linspace(0.5,16.5,10),linspace(prctile(store_R2_ratios(:,1),25),prctile(store_R2_ratios(:,1),25),10),'--b')
-plot(linspace(0.5,16.5,10),linspace(prctile(store_R2_ratios(:,1),75),prctile(store_R2_ratios(:,1),75),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(nanmedian(store_R2_ratios(:,3)),nanmedian(store_R2_ratios(:,3)),10),'--r')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_R2_ratios(:,3),25),prctile(store_R2_ratios(:,3),25),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_R2_ratios(:,3),75),prctile(store_R2_ratios(:,3),75),10),'--b')
 
 %% rmse:
 rmse_ratio = store_mod_data(:,6)./store_mod_data(:,7);
@@ -117,14 +117,14 @@ hold on
 b=boxplot(store_rmse_ratios,'Notch','off','Labels',labels,'whisker',1);
 set(b,'linew',3)
 set(gca,'fontsize',20)
-ylabel({'rmse ratio'},'fontsize',20)
+ylabel({'RMSE ratio'},'fontsize',20)
 xtickangle(20)
 ylim([0.85 1.6])
-xlim([0.5 16.5])
+xlim([0.5 length(idx_over10)+0.5])
 grid on
-plot(linspace(0.5,16.5,10),linspace(nanmedian(store_rmse_ratios(:,1)),nanmedian(store_rmse_ratios(:,1)),10),'--r')
-plot(linspace(0.5,16.5,10),linspace(prctile(store_rmse_ratios(:,1),25),prctile(store_rmse_ratios(:,1),25),10),'--b')
-plot(linspace(0.5,16.5,10),linspace(prctile(store_rmse_ratios(:,1),75),prctile(store_rmse_ratios(:,1),75),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(nanmedian(store_rmse_ratios(:,3)),nanmedian(store_rmse_ratios(:,3)),10),'--r')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_rmse_ratios(:,3),25),prctile(store_rmse_ratios(:,3),25),10),'--b')
+plot(linspace(0.5,length(idx_over10)+0.5,10),linspace(prctile(store_rmse_ratios(:,3),75),prctile(store_rmse_ratios(:,3),75),10),'--b')
 
 f.Position=[-1919        -144        1868         949];
 saveas(f,'/Users/abolafia/Drought_Fire_Snow/Plots/BA_predict_1984_2020_Obs_SWEImod_PCA_predictor_sensitivity_ensemble_higherPeakSWE.eps','epsc')

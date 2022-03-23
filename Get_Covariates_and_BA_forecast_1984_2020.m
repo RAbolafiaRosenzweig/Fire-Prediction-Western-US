@@ -24,7 +24,7 @@ BA_lat = ncread('/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/Merged_B
 BA_latvec = BA_lat(:);
 BA_lon = ncread('/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/Merged_BA/Merged_netcdf/Merged_BurnArea_200708.nc','XLONG_M');
 BA_lonvec = BA_lon(:);
-pp
+
 %remove NaN:
 idx_NAN_BAgrid = find(isnan(BA_latvec));
 BA_lonvec(idx_NAN_BAgrid)=[];
@@ -107,16 +107,16 @@ store_SWEI = store_SWEI.store_SWEI;
 % % store_spring_swe=[];
 % % for year = 1984:2020
 % %     infilename = sprintf('UA_SpringSWE_%04d.mat',year);
-% %     UA_PeakSWE = load([UA_peakSWE_dir,infilename]);
-% %     UA_PeakSWE = UA_PeakSWE.Data.current_spring_SWE;
+% %     UA_SWE = load([UA_peakSWE_dir,infilename]);
+% %     UA_SWE = UA_SWE.Data.current_spring_SWE;
 % %     idx = find(UA_PeakSWE == 0);
-% %     UA_PeakSWE(idx) = rand(length(idx),1)*10^-10;
-% %     store_spring_swe = [store_spring_swe,UA_PeakSWE(:)];
+% %     UA_SWE(idx) = rand(length(idx),1)*10^-10;
+% %     store_spring_swe = [store_spring_swe,UA_SWE(:)];
 % % end
 % % store_spring_swe = store_spring_swe(IDX_NN_UAswe,:);
 % % store_spring_swe = store_spring_swe(idx_BB,:);
 
-% % % % %rank the peak SWE values across the years for each pixel:
+% % % % %rank the spring SWE values across the years for each pixel:
 % % [~,ii] = sort(store_spring_swe,2);
 % % [~,i] = sort(ii,2);
 % % N=size(i,2);
@@ -188,9 +188,22 @@ MODIS_BA_dir = '/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/Merged_BA
 
 %% Compare summer (June-September) burn area with SWEI:
 %screen based on peak SWE:
-idx_PeakSWEthresh = find(max(store_peak_swe_BB(:,1:end)') >= peakSWE_thresh);
+idx_PeakSWEthresh = find(max(store_peak_swe_BB(:,1:end)') >= 100);
 %screen based on landcover type:
 idx_LC = Total_LC_index_BB;
+
+idx_Zthresh = find(Elevation_vec_BB>=0 & Elevation_vec_BB<=3300);
+IDX_screened = intersect(idx_Zthresh,idx_PeakSWEthresh);
+IDX_screened = intersect(IDX_screened,idx_LC);
+IDX_screened = intersect(IDX_screened,IDX_DEWS);
+Z_domain = Elevation_vec_BB(IDX_screened);
+
+BA_latvec_BB = BA_latvec(idx_BB);
+BA_lonvec_BB = BA_lonvec(idx_BB);
+lats_domain = BA_latvec_BB(IDX_screened);
+lons_domain = BA_lonvec_BB(IDX_screened);
+Domain_for_mendeley = [lats_domain,lons_domain,Z_domain];
+% dlmwrite('/Users/abolafia/Drought_Fire_Snow/Data/FOR_MENDELEY/Domain_100mm.csv',Domain_for_mendeley,'delimiter',',','precision',8);
 
 for Ziter = 1:length(Z_thresh_mins)
     Ziter
@@ -209,11 +222,14 @@ for Ziter = 1:length(Z_thresh_mins)
     else
         idx_Zthresh = find(Elevation_vec_BB>=Z_thresh_min & Elevation_vec_BB<=Z_thresh_max);
     end
+    
     %combined screening:
     IDX_screened = intersect(idx_Zthresh,idx_PeakSWEthresh);
     IDX_screened = intersect(IDX_screened,idx_LC);
     IDX_screened = intersect(IDX_screened,IDX_DEWS);
-    
+%     length(IDX_screened)*0.000247105*MOD_gridcell_area/10^6
+% length(Elevation_vec_BB)*0.000247105*MOD_gridcell_area/10^6
+pp
     %initialize output (WY SWEI and total summer BA):
     store_covariates = [];
     for WY = 1984:2020

@@ -38,7 +38,6 @@ Spring_SWEI_Z1 = Climate_Fire_Data[1:37,10]
 Spring_VPD_Z1 = Climate_Fire_Data[1:37,11] 
 Winter_VPD_Z1 = Climate_Fire_Data[1:37,12] 
 MODIS_BA_Z1 = Climate_Fire_Data[1:37,13] 
-MODIS_BA_Z1 = (MODIS_BA_Z1*0.000247105) /(10^6);
 Spring_ET_Z1 = Climate_Fire_Data[1:37,14] 
 Spring_PET_Z1 = Climate_Fire_Data[1:37,15] 
 Spring_PETminusET_Z1 = Climate_Fire_Data[1:37,16] 
@@ -317,57 +316,57 @@ nvars <- 17
 # idx_bestmod_4vars = store_i_3vars[idx_bestmod_4vars]
 # 
 # 
-# #for  combos of 5 variables:
-# n_predictors <- 5
-# ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
-# x=1:nvars
-# combo_IDs<-combn(x,n_predictors)
-# 
-# store_AIC_5vars = c()
-# store_R_5vars = c()
-# store_i_5vars=c()
-# for (i in 1:ncombos){
-#   col1 <- combo_IDs[1,i]
-#   col2 <- combo_IDs[2,i]
-#   col3 <- combo_IDs[3,i]
-#   col4 <- combo_IDs[4,i]
-#   col5 <- combo_IDs[5,i]
-#   
-#   predictor1 <-Climate_Fire_DF[,col1]
-#   predictor2 <-Climate_Fire_DF[,col2]
-#   predictor3 <-Climate_Fire_DF[,col3]
-#   predictor4 <-Climate_Fire_DF[,col4]
-#   predictor5 <-Climate_Fire_DF[,col5]
-#   #PCA combo model:
-#   Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5)
-#   df.pca <- prcomp(Covariates_DF, center = TRUE,scale. = TRUE)
-#   pcs = df.pca$x
-#   pc1 = pcs[,1]
-#   pc2 = pcs[,2]
-#   pc3 = pcs[,3]
-#   pc4 = pcs[,4]
-#   pc5 = pcs[,5]
-#   current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=as.vector(Zs))
-#   mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+predictor6,family="gaussian")
-#   
-#   X = concurvity(mod,full=FALSE)
-#   X=X$estimate
-#   idx <- which(X==1)
-#   X[idx] = 0
-#   Max_Concuvrity <- max(X)
-#   if (Max_Concuvrity <= concurvity_threshold){
-#     AIC = mod$aic
-#     R = cor(predict(mod),Y)
-#     
-#     store_R_5vars = c(store_R_5vars,R)
-#     store_AIC_5vars = c(store_AIC_5vars,AIC)
-#     store_i_5vars = c(store_i_5vars,i)
-#   }
-# }
-# 
-# idx_bestmod_5vars <- which(store_AIC_5vars==min(store_AIC_5vars))
-# store_R_5vars[idx_bestmod_5vars]
-# idx_bestmod_5vars = store_i_5vars[idx_bestmod_5vars]
+#for  combos of 5 variables:
+n_predictors <- 5
+ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
+x=1:nvars
+combo_IDs<-combn(x,n_predictors)
+
+store_AIC_5vars = c()
+store_R_5vars = c()
+store_i_5vars=c()
+for (i in 1:ncombos){
+  col1 <- combo_IDs[1,i]
+  col2 <- combo_IDs[2,i]
+  col3 <- combo_IDs[3,i]
+  col4 <- combo_IDs[4,i]
+  col5 <- combo_IDs[5,i]
+
+  predictor1 <-Climate_Fire_DF[,col1]
+  predictor2 <-Climate_Fire_DF[,col2]
+  predictor3 <-Climate_Fire_DF[,col3]
+  predictor4 <-Climate_Fire_DF[,col4]
+  predictor5 <-Climate_Fire_DF[,col5]
+  #PCA combo model:
+  Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5)
+  df.pca <- prcomp(Covariates_DF, center = TRUE,scale. = TRUE)
+  pcs = df.pca$x
+  pc1 = pcs[,1]
+  pc2 = pcs[,2]
+  pc3 = pcs[,3]
+  pc4 = pcs[,4]
+  pc5 = pcs[,5]
+  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=as.vector(Zs))
+  mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+predictor6,family="gaussian")
+
+  X = concurvity(mod,full=FALSE)
+  X=X$estimate
+  idx <- which(X==1)
+  X[idx] = 0
+  Max_Concuvrity <- max(X)
+  if (Max_Concuvrity <= concurvity_threshold){
+    AIC = mod$aic
+    R = cor(predict(mod),Y)
+
+    store_R_5vars = c(store_R_5vars,R)
+    store_AIC_5vars = c(store_AIC_5vars,AIC)
+    store_i_5vars = c(store_i_5vars,i)
+  }
+}
+
+idx_bestmod_5vars <- which(store_AIC_5vars==min(store_AIC_5vars))
+store_R_5vars[idx_bestmod_5vars]
+idx_bestmod_5vars = store_i_5vars[idx_bestmod_5vars]
 # 
 # #for  combos of 6 variables:
 # n_predictors <- 6
@@ -484,66 +483,66 @@ nvars <- 17
 # idx_bestmod_7vars = store_i_7vars[idx_bestmod_7vars]
 
 
-#for  combos of 8 variables:
-n_predictors <- 8
-ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
-x=1:nvars
-combo_IDs<-combn(x,n_predictors)
-
-store_AIC_8vars = c()
-store_R_8vars = c()
-store_i_8vars = c()
-for (i in 1:ncombos){
-  col1 <- combo_IDs[1,i]
-  col2 <- combo_IDs[2,i]
-  col3 <- combo_IDs[3,i]
-  col4 <- combo_IDs[4,i]
-  col5 <- combo_IDs[5,i]
-  col6 <- combo_IDs[6,i]
-  col7 <- combo_IDs[7,i]
-  col8 <- combo_IDs[8,i]
-
-  predictor1 <-Climate_Fire_DF[,col1]
-  predictor2 <-Climate_Fire_DF[,col2]
-  predictor3 <-Climate_Fire_DF[,col3]
-  predictor4 <-Climate_Fire_DF[,col4]
-  predictor5 <-Climate_Fire_DF[,col5]
-  predictor6 <-Climate_Fire_DF[,col6]
-  predictor7 <-Climate_Fire_DF[,col7]
-  predictor8 <-Climate_Fire_DF[,col8]
-  #PCA combo model:
-  Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
-  df.pca <- prcomp(Covariates_DF, center = TRUE,scale. = TRUE)
-  pcs = df.pca$x
-  pc1 = pcs[,1]
-  pc2 = pcs[,2]
-  pc3 = pcs[,3]
-  pc4 = pcs[,4]
-  pc5 = pcs[,5]
-  pc6 = pcs[,6]
-  pc7 = pcs[,7]
-  pc8 = pcs[,8]
-  current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=pc8,predictor9=as.vector(Zs))
-  mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+s(predictor6)+s(predictor7)+s(predictor8)+predictor9,family="gaussian")
-
-  X = concurvity(mod,full=FALSE)
-  X=X$estimate
-  idx <- which(X==1)
-  X[idx] = 0
-  Max_Concuvrity <- max(X)
-  if (Max_Concuvrity <= concurvity_threshold){
-    AIC = mod$aic
-    R = cor(predict(mod),Y)
-
-    store_R_8vars = c(store_R_8vars,R)
-    store_AIC_8vars = c(store_AIC_8vars,AIC)
-    store_i_8vars = c(store_i_8vars,i)
-  }
-}
-
-idx_bestmod_8vars <- which(store_AIC_8vars==min(store_AIC_8vars))
-store_R_8vars[idx_bestmod_8vars]
-idx_bestmod_8vars = store_i_8vars[idx_bestmod_8vars]
+# #for  combos of 8 variables:
+# n_predictors <- 8
+# ncombos = factorial(nvars)/(factorial(n_predictors)*factorial(nvars-n_predictors))
+# x=1:nvars
+# combo_IDs<-combn(x,n_predictors)
+# 
+# store_AIC_8vars = c()
+# store_R_8vars = c()
+# store_i_8vars = c()
+# for (i in 1:ncombos){
+#   col1 <- combo_IDs[1,i]
+#   col2 <- combo_IDs[2,i]
+#   col3 <- combo_IDs[3,i]
+#   col4 <- combo_IDs[4,i]
+#   col5 <- combo_IDs[5,i]
+#   col6 <- combo_IDs[6,i]
+#   col7 <- combo_IDs[7,i]
+#   col8 <- combo_IDs[8,i]
+# 
+#   predictor1 <-Climate_Fire_DF[,col1]
+#   predictor2 <-Climate_Fire_DF[,col2]
+#   predictor3 <-Climate_Fire_DF[,col3]
+#   predictor4 <-Climate_Fire_DF[,col4]
+#   predictor5 <-Climate_Fire_DF[,col5]
+#   predictor6 <-Climate_Fire_DF[,col6]
+#   predictor7 <-Climate_Fire_DF[,col7]
+#   predictor8 <-Climate_Fire_DF[,col8]
+#   #PCA combo model:
+#   Covariates_DF = data.frame(predictor1=predictor1,predictor2=predictor2,predictor3=predictor3,predictor4=predictor4,predictor5=predictor5,predictor6=predictor6,predictor7=predictor7,predictor8=predictor8)
+#   df.pca <- prcomp(Covariates_DF, center = TRUE,scale. = TRUE)
+#   pcs = df.pca$x
+#   pc1 = pcs[,1]
+#   pc2 = pcs[,2]
+#   pc3 = pcs[,3]
+#   pc4 = pcs[,4]
+#   pc5 = pcs[,5]
+#   pc6 = pcs[,6]
+#   pc7 = pcs[,7]
+#   pc8 = pcs[,8]
+#   current_DF_pcs <- data.frame(Y=Y,predictor1=pc1,predictor2=pc2,predictor3=pc3,predictor4=pc4,predictor5=pc5,predictor6=pc6,predictor7=pc7,predictor8=pc8,predictor9=as.vector(Zs))
+#   mod <- gam(data=current_DF_pcs,Y~s(predictor1)+s(predictor2)+s(predictor3)+s(predictor4)+s(predictor5)+s(predictor6)+s(predictor7)+s(predictor8)+predictor9,family="gaussian")
+# 
+#   X = concurvity(mod,full=FALSE)
+#   X=X$estimate
+#   idx <- which(X==1)
+#   X[idx] = 0
+#   Max_Concuvrity <- max(X)
+#   if (Max_Concuvrity <= concurvity_threshold){
+#     AIC = mod$aic
+#     R = cor(predict(mod),Y)
+# 
+#     store_R_8vars = c(store_R_8vars,R)
+#     store_AIC_8vars = c(store_AIC_8vars,AIC)
+#     store_i_8vars = c(store_i_8vars,i)
+#   }
+# }
+# 
+# idx_bestmod_8vars <- which(store_AIC_8vars==min(store_AIC_8vars))
+# store_R_8vars[idx_bestmod_8vars]
+# idx_bestmod_8vars = store_i_8vars[idx_bestmod_8vars]
 # 
 # #for  combos of 9 variables:
 # n_predictors <- 9
@@ -847,16 +846,16 @@ idx_bestmod_8vars = store_i_8vars[idx_bestmod_8vars]
 # vars=c("SWEI","WinPRCP","WinTMP","Spring-prcp","Spring TMP","Spring VPD","Winter VPD","Spring ET","Spring PET","Winter ET","Winter PET","Spring area","winter+spring temp","winter+spring precip","winter+spring VPD","winter+spring PET")
 
 #record best 100 models:
-AIC_8vars=store_AIC_8vars
-i_8vars=store_i_8vars
+AIC_5vars=store_AIC_5vars
+i_5vars=store_i_5vars
 store_i=c()
 for (b in 1:100){
-  idx_bestmod_8vars <- which(AIC_8vars==min(AIC_8vars))
-  i_bestmod_8vars = i_8vars[idx_bestmod_8vars]
-  store_i =cbind(store_i,i_bestmod_8vars)
+  idx_bestmod_5vars <- which(AIC_5vars==min(AIC_5vars))
+  i_bestmod_5vars = i_5vars[idx_bestmod_5vars]
+  store_i =cbind(store_i,i_bestmod_5vars)
   
-  AIC_8vars=AIC_8vars[-idx_bestmod_8vars]
-  i_8vars=i_8vars[-idx_bestmod_8vars]
+  AIC_5vars=AIC_5vars[-idx_bestmod_5vars]
+  i_5vars=i_5vars[-idx_bestmod_5vars]
 }
 
 best_is=store_i

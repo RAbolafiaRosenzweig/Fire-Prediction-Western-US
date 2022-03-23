@@ -495,11 +495,11 @@ for m=1:12
     subplot(3,4,m)
     hold on
     plot(years,current_month_BA,'-r','linewidth',2);
-    %get trend line:
-    p = polyfit(years,current_month_BA,1);
+    %get trend line (excluding 2020):
+    p = polyfit(years(1:end-1),current_month_BA(1:end-1),1);
     y=@(x) p(1)*x + p(2);
-    BA_trend = y(years);
-    plot(years,BA_trend,'--r','linewidth',1.5)
+    BA_trend = y(years(1:end-1));
+    plot(years(1:end-1),BA_trend,'--r','linewidth',1.5)
     TITLE = titles{m};
     title(TITLE,'fontsize',22)
     set(gca,'fontsize',22)
@@ -508,14 +508,14 @@ for m=1:12
     xlim([1984 2020])
     ylim([0 max(current_month_BA)+0.1*max(current_month_BA)])
     %store trend as percent increase/decrease per year for respective months
-    store_trends = [store_trends;p(1)/mean(current_month_BA)*100];
+    store_trends = [store_trends;p(1)/mean(current_month_BA(1:end-1))*100];
     %store this months correlation with summer BA:
     R = corr(summer_BA',current_month_BA);
     store_R = [store_R;R];
 end
 f.Position = [-1909         -73        1764         923];
 saveas(f,'/Users/abolafia/Drought_Fire_Snow/Plots/Burn_area_timeseries_by_month.eps','epsc')
-
+pp
 %% Plot correlation between screened area and total w. CONUS:
 %trim data to summer months:
 idx = find(BA_data(:,2)>=6 & BA_data(:,2)<=9);
@@ -550,7 +550,6 @@ xlim([0 5])
 ylim([0 7])
 saveas(fig,'/Users/abolafia/Drought_Fire_Snow/Plots/Screened_TotalwUS_Scatter.eps','epsc')
 
-pp
 %% plot pie chart of BA by Z bins:
 BA_data_summer_Z1 = nansum(BA_data_summer(:,5));
 BA_data_summer_Z2 = nansum(BA_data_summer(:,6));

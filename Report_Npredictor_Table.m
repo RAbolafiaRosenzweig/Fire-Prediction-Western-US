@@ -1,7 +1,6 @@
 clc;clear all;close all;
 
 %% SWEI mods
-
 store_Taylor_Error=[];
 for npredictors = 2:11
     infilename=sprintf('/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/AnlysisData/Best_Obs_Forecast_outputs/BAs_1984_2020_Obs_SWEImod_PCA_%dvars_AICfit_Drop1Taylor.csv',npredictors);

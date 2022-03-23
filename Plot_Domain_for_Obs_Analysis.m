@@ -336,7 +336,6 @@ WesternUS_BA.screened = BA_screened;
 WesternUS_BA.total = BA_wUS;
 outfilename=sprintf('/Volumes/Pruina_External_Elements/DroughtFireSnow/Data/Merged_BA/Supplementary/BA_time_series_screened_and_total.mat');
 save(outfilename,'WesternUS_BA');
-pp
 
 %% plot pie chart of BA by vegetation type:
 LC_types_screened = MODIS_LC_BB(IDX_screened);
@@ -362,6 +361,35 @@ Pie_Data = [L_ENF,L_EBF,L_DNF,L_DBF,L_MF,L_Savanna,L_grass];
 labels = {'ENF','EBF','DNF','DBF','MF','Savanna','Grass'};
 f=figure;
 pie(Pie_Data,labels);
+pp
+LC_types_screened([idx_ENF;idx_EBF;idx_DNF;idx_MF]) = 1;
+
+f=figure;
+sz=1;
+geoscatter(DOMAIN_Y,DOMAIN_X,sz,[0.9 0.9 0.9],'.');
+hold on
+
+%show state lines:
+states=shaperead('usastatehi', 'UseGeoCoords', true);
+for i=1:49
+    lat = states(i).Lat;
+    lon = states(i).Lon;
+    geoplot(lat,lon,'LineWidth',1.5,'color','k','linewidth',2);
+end
+
+%backdrop the satellite image
+% geobasemap satellite
+set(gca,'fontsize',25)
+f.Position =[-1916        -110         864         915];
+% % f.PaperOrientation='portrait';
+% % f.PaperPosition = [0   0   12.0000*0.83   12.7083*0.83];
+geolimits([32 49.1],[-125 -104])
+cmap=summer(6);
+cmap(1,:)= [1 0 0];
+colormap(cmap);
+C=LC_types_screened;
+geoscatter(DOMAIN_Y,DOMAIN_X,sz,C,'.');
+colorbar
 
 %% include spatial plot that show burn fraction for entire western CONUS as well:
 store_BurnFraction_W_US = [store_BurnFraction_Total_MTBS,store_BurnFraction_Total_MODIS(:,end)];

@@ -39,12 +39,13 @@ end
 Annual_BA_obs = [Annual_BA_obs];
 
 ensemble_mean = median(store_predictions')';
+bestfit = ensemble_mean;
 %ensemble_mean = store_predictions;
 
 se = max(store_se')';
 %record ensemble upper and lower bounds based on se from gam predictions:
-ensemble_upr = max(store_predictions')';
-ensemble_lwr = min(store_predictions')';
+ensemble_upr = prctile(store_predictions',97.5)';
+ensemble_lwr = prctile(store_predictions',2.5)';
 
 %% plot data:
 lb=ensemble_mean-ensemble_lwr;
@@ -147,8 +148,8 @@ ensemble_mean = median(store_predictions')';
 
 se = max(store_se')';
 %record ensemble upper and lower bounds based on se from gam predictions:
-ensemble_upr = max(store_predictions')';
-ensemble_lwr = min(store_predictions')';
+ensemble_upr = prctile(store_predictions',97.5)';
+ensemble_lwr = prctile(store_predictions',2.5)';
 %% plot data:
 lb=ensemble_mean-ensemble_lwr;
 ub=ensemble_upr-ensemble_mean;
@@ -158,16 +159,30 @@ f=figure;
 hold on
 shadedErrorBar(years, ensemble_mean, [ub';lb'], 'k-',1);
 p1=plot(years, ensemble_mean,'-k','linewidth',3);
-%include trend line:
-p=polyfit(years,ensemble_mean,1);
+
+%compute trend line (including 2020):
+p=polyfit(years(1:end),ensemble_mean(1:end),1);
 y = @(x) p(1)*x + p(2);
-plot(years,y(years),'--k','linewidth',2)
+sprintf('drop1 prediction increasing trend (including 2020): %.2f/year',p(1)/mean(ensemble_mean(1:end))*100)
+
+%include trend line (excluding 2020):
+p=polyfit(years(1:end-1),ensemble_mean(1:end-1),1);
+y = @(x) p(1)*x + p(2);
+plot(years(1:end-1),y(years(1:end-1)),'--k','linewidth',2)
+sprintf('drop1 prediction increasing trend (excluding 2020): %.2f/year',p(1)/mean(ensemble_mean(1:end-1))*100)
 
 p2 = plot(years,Annual_BA_obs,'-r','linewidth',3);
-%include trend line:
-p=polyfit(years,Annual_BA_obs,1);
+
+%compute trend line (including 2020):
+p=polyfit(years(1:end),Annual_BA_obs(1:end),1);
 y = @(x) p(1)*x + p(2);
-plot(years,y(years),'--r','linewidth',2)
+sprintf('obs increasing trend: %.2f/year (including 2020)',p(1)/mean(Annual_BA_obs)*100)
+
+%include trend line (excluding 2020):
+p=polyfit(years(1:end-1),Annual_BA_obs(1:end-1),1);
+y = @(x) p(1)*x + p(2);
+plot(years(1:end-1),y(years(1:end-1)),'--r','linewidth',2)
+sprintf('obs increasing trend: %.2f/year (excluding 2020)',p(1)/mean(Annual_BA_obs(1:end-1))*100)
 
 legend([p1 p2],{'Predicted','Observed'},'fontsize',25,'location','northwest')
 ylabel('Burned area (millions of acres)','fontsize',25)
@@ -202,6 +217,8 @@ set(gca,'fontsize',25)
 %R and RMSE
 R = corr(Annual_BA_obs,ensemble_mean,'rows','complete')
 RMSE = sqrt( mean((Annual_BA_obs-ensemble_mean).^2) )
+PBIAS =  mean( ((ensemble_mean-Annual_BA_obs)./mean(Annual_BA_obs)) ) * 100;
+
 %percent of time +/- anomalies are correctly predicted:
 Annual_BA_obs_anom = Annual_BA_obs - mean(Annual_BA_obs);
 ensemble_mean_anom = ensemble_mean - mean(ensemble_mean);
